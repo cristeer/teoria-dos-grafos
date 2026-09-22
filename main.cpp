@@ -4,7 +4,7 @@
 using namespace std;
 
 int main() {
-    string caminho = "instancias/grafo_5.txt"; // Nome do seu arquivo de texto
+    string caminho = "instancias/ex grafo 1.txt"; // Nome do seu arquivo de texto
     int vertices = 0;
 
     // 1. Teste com Lista de Adjacência

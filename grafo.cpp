@@ -24,8 +24,10 @@ bool ler_grafo_lista(const string& caminho, int& vertices, lista_adj& lista_adj)
 bool ler_grafo_matriz(const string& caminho, int& vertices, matriz_adj& matriz_adj) {
    int u, v;   
     ifstream arq(caminho);
-    if (!arq.is_open())
+    if (!arq.is_open()) {
         cout << "Não encontramos o arquivo!\n";
+        return false;
+    }
 
     arq >> vertices;
     matriz_adj.assign(vertices+1, vector<bool>(vertices+1, false));
