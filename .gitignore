@@ -2,3 +2,5 @@ instancias/*.txt
 output/
 *.exe
 .vscode/
+Saidas/
+.venv
