@@ -68,6 +68,7 @@ int main() {
         saida = pasta_saida + prefixo + "_info.txt";
         saida_bfs = pasta_saida + prefixo + "_bfs.txt";
         saida_dfs = pasta_saida + prefixo + "_dfs.txt";
+        string saida_componentes = pasta_saida + prefixo + "_componentes.txt";
 
         system("cls");
 
@@ -78,6 +79,8 @@ int main() {
 
             if (ler_grafo_matriz(caminho, vertices, matriz)) {
                 cout << "Numero de vertices: " << vertices << "\n";
+
+                vector<vector<int>> cc = cc_matriz(vertices, matriz);
 
                 if (imprimir == 1) {
                     cout << "\n   ";
@@ -93,7 +96,11 @@ int main() {
                     }
                 }
 
-                if (gerar_informacoes_matriz(saida, vertices, matriz)) {
+                if (salvar_componentes_conexas(saida_componentes, cc)) {
+                    cout << "\n[OK] Arquivo de componentes conexas gerado em: " << saida_componentes << "\n";
+                }
+
+                if (gerar_informacoes_matriz(saida, vertices, matriz, cc)) {
                     cout << "\n[OK] Arquivo de informacoes gerado em: " << saida << "\n";
                 }
 
@@ -102,9 +109,11 @@ int main() {
                     cin >> vertice_inicial;
                 } while (vertice_inicial < 1 || vertice_inicial > vertices);
 
-                vector<int> pai_bfs, nivel_bfs;
+                vector<int> pai_bfs(vertices + 1, -1);
+                vector<int> nivel_bfs(vertices + 1, -1);
+                vector<int> comp_bfs;
                 cout << "\nExecutando BFS...";
-                bfs_matriz(vertice_inicial, vertices, matriz, pai_bfs, nivel_bfs);
+                bfs_matriz(vertice_inicial, vertices, matriz, pai_bfs, nivel_bfs, comp_bfs);
                 if (salvar_arvore_busca(saida_bfs, vertices, pai_bfs, nivel_bfs)) {
                     cout << "\n[OK] Arvore BFS salva em: " << saida_bfs << "\n";
                 }
@@ -126,6 +135,8 @@ int main() {
             if (ler_grafo_lista(caminho, vertices, lista)) {
                 cout << "Numero de vertices: " << vertices << "\n";
 
+                vector<vector<int>> cc = cc_lista(vertices, lista);
+                
                 if (imprimir == 1) {
                     cout << "\n";
                     for (int i = 1; i <= vertices; ++i) {
@@ -137,7 +148,11 @@ int main() {
                     }
                 }
 
-                if (gerar_informacoes_lista(saida, vertices, lista)) {
+                if (salvar_componentes_conexas(saida_componentes, cc)) {
+                    cout << "\n[OK] Arquivo de componentes conexas gerado em: " << saida_componentes << "\n";
+                }
+
+                if (gerar_informacoes_lista(saida, vertices, lista, cc)) {
                     cout << "\n[OK] Arquivo de informacoes gerado em: " << saida << "\n";
                 }
 
@@ -146,9 +161,11 @@ int main() {
                     cin >> vertice_inicial;
                 } while (vertice_inicial < 1 || vertice_inicial > vertices);
 
-                vector<int> pai_bfs, nivel_bfs;
+                vector<int> pai_bfs(vertices + 1, -1);
+                vector<int> nivel_bfs(vertices + 1, -1);
+                vector<int> comp_bfs;
                 cout << "\nExecutando BFS...";
-                bfs_lista(vertice_inicial, vertices, lista, pai_bfs, nivel_bfs);
+                bfs_lista(vertice_inicial, vertices, lista, pai_bfs, nivel_bfs, comp_bfs);
                 if (salvar_arvore_busca(saida_bfs, vertices, pai_bfs, nivel_bfs)) {
                     cout << "\n[OK] Arvore BFS salva em: " << saida_bfs << "\n";
                 }

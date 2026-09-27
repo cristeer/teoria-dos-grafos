@@ -1,4 +1,5 @@
 #include "algoritmos.hpp"
+#include <algorithm>
 
 int UNVISITED = -1;
 
@@ -30,11 +31,7 @@ bool salvar_arvore_busca(const string& caminho_saida, int vertices, const vector
     return true;
 }
 
-void bfs_lista(int s, int vertices, const lista_adj& adj, vector<int>& pai, vector<int>& nivel) {
-    //vetores  começando em 1, preenchidos por -1
-    pai.assign(vertices + 1, -1);
-    nivel.assign(vertices + 1, UNVISITED);
-
+void bfs_lista(int s, int vertices, const lista_adj& adj, vector<int>& pai, vector<int>& nivel, vector<int>& componente_atual) {
     queue<int> fila;
     
     nivel[s] = 0;  // vertice inicial dado pela biblioteca
@@ -44,6 +41,7 @@ void bfs_lista(int s, int vertices, const lista_adj& adj, vector<int>& pai, vect
     while (!fila.empty()) {
         int u = fila.front(); 
         fila.pop();
+        componente_atual.push_back(u);
 
         for (int v : adj[u]) {
             if (nivel[v] != UNVISITED)
@@ -84,11 +82,9 @@ void dfs_lista(int s, int vertices, const lista_adj& adj, vector<int>& pai, vect
     }
 }
 
-void bfs_matriz(int s, int vertices, const matriz_adj& mat, vector<int>& pai, vector<int>& nivel) {
-    pai.assign(vertices + 1, -1);
-    nivel.assign(vertices + 1, UNVISITED);
-
+void bfs_matriz(int s, int vertices, const matriz_adj& mat, vector<int>& pai, vector<int>& nivel, vector<int>& componente_atual) {
     queue<int> fila;
+
     nivel[s] = 0;
     pai[s] = 0;
     fila.push(s);
@@ -96,6 +92,7 @@ void bfs_matriz(int s, int vertices, const matriz_adj& mat, vector<int>& pai, ve
     while (!fila.empty()) {
         int u = fila.front(); 
         fila.pop();
+        componente_atual.push_back(u);
 
         for (int v = 1; v <= vertices; ++v) {
             if (mat[u][v] && nivel[v] == UNVISITED) {
@@ -135,4 +132,72 @@ void dfs_matriz(int s, int vertices, const matriz_adj& mat, vector<int>& pai, ve
     }
 }
 
+static bool comparar_componentes(const vector<int>& a, const vector<int>& b) {
+    if (a.size() != b.size())
+        return a.size() > b.size();
+    return a.front() < b.front();
+}
 
+vector<vector<int>> cc_lista(int vertices, const lista_adj& adj) {
+   vector<int> pai(vertices + 1, -1);
+   vector<int> nivel(vertices + 1, UNVISITED);
+   vector<vector<int>> componentes;
+
+    for (int i = 1; i <= vertices; ++i) {
+        if (nivel[i] == UNVISITED) {
+            vector<int> componente_atual;
+            bfs_lista(i, vertices, adj, pai, nivel, componente_atual);
+            sort(componente_atual.begin(), componente_atual.end());
+            componentes.push_back(componente_atual);
+        }
+    }
+
+    sort(componentes.begin(), componentes.end(), comparar_componentes);
+    return componentes;
+}
+
+vector<vector<int>> cc_matriz(int vertices, const matriz_adj& mat) {
+    vector<int> pai(vertices + 1, -1);
+    vector<int> nivel(vertices + 1, UNVISITED);
+    vector<vector<int>> componentes;
+
+    for (int i = 1; i <= vertices; ++i) {
+        if (nivel[i] == UNVISITED) {
+            vector<int> componente_atual;
+            bfs_matriz(i, vertices, mat, pai, nivel, componente_atual);
+            sort(componente_atual.begin(), componente_atual.end());
+            componentes.push_back(componente_atual);
+        }
+    }
+
+    sort(componentes.begin(), componentes.end(), comparar_componentes);
+    return componentes;
+}
+
+bool salvar_componentes_conexas(const string& caminho_saida, const vector<vector<int>>& componentes) {
+    filesystem::path pasta = filesystem::path(caminho_saida).parent_path();
+    if (!pasta.empty()) {
+        verificadorDePastaSimples(pasta);
+    }
+
+    ofstream arq(caminho_saida, ios::out | ios::trunc);
+    if (!arq.is_open()) {
+        cout << "Erro ao criar arquivo de componentes conexas!\n";
+        return false;
+    }
+
+    arq << "COMPONENTES CONEXAS\n";
+    arq << "Total de componentes: " << componentes.size() << "\n\n";
+
+    for (size_t i = 0; i < componentes.size(); ++i) {
+        arq << "Componente " << (i + 1) << "\tTamanho: " << componentes[i].size() << "\n";
+        arq << "Vertices: ";
+        for (size_t j = 0; j < componentes[i].size(); ++j) {
+            arq << componentes[i][j] << (j + 1 == componentes[i].size() ? "" : " ");
+        }
+        arq << "\n\n";
+    }
+
+    arq.close();
+    return true;
+}

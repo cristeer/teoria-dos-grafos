@@ -8,7 +8,7 @@ void verificadorDePastaSimples(filesystem::path pastinha){
 }
 
 // gera o arquivo com as informações nessesárias do grafo;
-bool gerar_informacoes_lista(const string &caminhoSaida, int vertices, const lista_adj &lista){
+bool gerar_informacoes_lista(const string &caminhoSaida, int vertices, const lista_adj &lista, const vector<vector<int>>& componentes){
 
     filesystem::path pasta = "Saidas/Listas";verificadorDePastaSimples(pasta);
     
@@ -66,8 +66,8 @@ bool gerar_informacoes_lista(const string &caminhoSaida, int vertices, const lis
     arq << fixed << setprecision(2);
     arq << "Grau médio: " << grauMedio << "\n";
     arq << "Mediana dos graus: " << mediana << "\n";
-    arq.close();
 
+    arq.close();
     return true;
 }
 
@@ -89,9 +89,9 @@ bool ler_grafo_lista(const string &caminho, int &vertices, lista_adj &lista_adj)
     return true;
 }
 
-bool gerar_informacoes_matriz(const string& caminhoSaida,int vertices,const matriz_adj& matriz) {
+bool gerar_informacoes_matriz(const string& caminhoSaida,int vertices,const matriz_adj& matriz, const vector<vector<int>>& componentes) {
 
-    filesystem::path pasta = "Saidas/Matriz";verificadorDePastaSimples(pasta);
+    filesystem::path pasta = "Saidas/Matriz"; verificadorDePastaSimples(pasta);
     
     ofstream arq(caminhoSaida, ios::out | ios::trunc);
     if (!arq.is_open()){
@@ -149,8 +149,8 @@ bool gerar_informacoes_matriz(const string& caminhoSaida,int vertices,const matr
     arq << fixed << setprecision(2);
     arq << "Grau médio: "<< grauMedio << "\n";
     arq << "Mediana dos graus: "<< mediana << "\n";
-    arq.close();
 
+    arq.close();
     return true;
 }
 
