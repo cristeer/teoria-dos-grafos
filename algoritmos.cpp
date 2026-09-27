@@ -1,8 +1,6 @@
-#include "buscas.hpp"
+#include "algoritmos.hpp"
 
- 
 int UNVISITED = -1;
-
 
 bool salvar_arvore_busca(const string& caminho_saida, int vertices, const vector<int>& pai, const vector<int>& nivel) {
     filesystem::path pasta = filesystem::path(caminho_saida).parent_path();
@@ -16,7 +14,7 @@ bool salvar_arvore_busca(const string& caminho_saida, int vertices, const vector
         return false;
     }
 
-    arq << "{{=====}} [ ARVORE DE BUSCA ] {{=====}}\n";
+    arq << "ARVORE DE BUSCA ]\n";
     arq << "Vertice\tPai\tNivel\n";
     arq << "-----------------------------\n";
 

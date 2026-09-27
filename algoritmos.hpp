@@ -1,5 +1,5 @@
-#ifndef BUSCAS_HPP
-#define BUSCAS_HPP
+#ifndef ALGORITMOS_HPP
+#define ALGORITMOS_HPP
 
 #include "arquivos.hpp"
 #include <vector>
@@ -7,9 +7,7 @@
 #include <stack>
 #include <string>
 
-
 bool salvar_arvore_busca(const string& caminho_saida, int vertices, const vector<int>& pai, const vector<int>& nivel);
-
 
 void bfs_lista(int s, int vertices, const lista_adj& adj, vector<int>& pai, vector<int>& nivel);
 void dfs_lista(int s, int vertices, const lista_adj& adj, vector<int>& pai, vector<int>& nivel);

@@ -1,15 +1,13 @@
 #include "arquivos.hpp"
 
 void verificadorDePastaSimples(filesystem::path pastinha){
-    // Tenta criar a pasta
-    if (filesystem::create_directories(pastinha)) {
+    // tenta criar a pasta
+    if (filesystem::create_directories(pastinha))
         cout << "Pasta criada com sucesso!" << endl;
-    } else {
-        cout << "A pasta ja existe" << endl;
-    }
+    
 }
 
-// Gera o arquivo com as informações nessesárias do grafo;
+// gera o arquivo com as informações nessesárias do grafo;
 bool gerar_informacoes_lista(const string &caminhoSaida, int vertices, const lista_adj &lista){
 
     filesystem::path pasta = "Saidas/Listas";verificadorDePastaSimples(pasta);
@@ -91,8 +89,6 @@ bool ler_grafo_lista(const string &caminho, int &vertices, lista_adj &lista_adj)
     return true;
 }
 
-//  ======  MATRIZ  ===================================================================
-
 bool gerar_informacoes_matriz(const string& caminhoSaida,int vertices,const matriz_adj& matriz) {
 
     filesystem::path pasta = "Saidas/Matriz";verificadorDePastaSimples(pasta);
@@ -168,6 +164,14 @@ bool ler_grafo_matriz(const string &caminho, int &vertices, matriz_adj &matriz_a
     }
 
     arq >> vertices;
+
+    const int limite = 50000;
+    if (vertices > limite) {
+        cout << "\n[ERRO] Memoria Insuficiente\n";
+        cout << "Utilize Lista de Adjacencia para esta instancia.\n";
+        return false;
+    }
+
     matriz_adj.assign(vertices + 1, vector<bool>(vertices + 1, false));
 
     while (arq >> u >> v){
