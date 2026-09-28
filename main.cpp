@@ -3,11 +3,13 @@
 
 int main() {
     string caminho = "", saida = "", saida_bfs = "", saida_dfs = "";
-    int vertices = 0, tipo_entrada = 0, select = 0, imprimir = 0, vertice_inicial = 1;
+    int vertices = 0, tipo_entrada = 0, select = 0, imprimir = 0;
+    int vertice_inicial = 1, vertice_destino = 1;
 
     do {
 
         do {
+            grafo:
             system("cls"); // se for no linux/mac, trocar por "clear"
             cout << "\n";
             cout << "{|+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+|}" << "\n";
@@ -57,7 +59,7 @@ int main() {
 
         if (select == 0) {
             cout << "Saindo...\n";
-            return 0;
+            goto grafo;
         }
 
         // caminhos e arquivos de saída
@@ -109,11 +111,16 @@ int main() {
                     cin >> vertice_inicial;
                 } while (vertice_inicial < 1 || vertice_inicial > vertices);
 
+                 do {
+                    cout << "\nInforme o vertice Destino para as buscas BFS e DFS (1 a " << vertices << "): ";
+                    cin >> vertice_destino;
+                } while (vertice_destino < 1 || vertice_destino > vertices);
+
                 vector<int> pai_bfs(vertices + 1, -1);
                 vector<int> nivel_bfs(vertices + 1, -1);
                 vector<int> comp_bfs;
                 cout << "\nExecutando BFS...";
-                bfs_matriz(vertice_inicial, vertices, matriz, pai_bfs, nivel_bfs, comp_bfs);
+                bfs_matriz(vertice_inicial, vertices, matriz, pai_bfs, nivel_bfs, comp_bfs, vertice_destino);
                 if (salvar_arvore_busca(saida_bfs, vertices, pai_bfs, nivel_bfs)) {
                     cout << "\n[OK] Arvore BFS salva em: " << saida_bfs << "\n";
                 }
@@ -124,10 +131,13 @@ int main() {
                 if (salvar_arvore_busca(saida_dfs, vertices, pai_dfs, nivel_dfs)) {
                     cout << "\n[OK] Arvore DFS salva em: " << saida_dfs << "\n";
                 }
+
+                int diametro = diametro_aproximado_matriz(vertices, matriz);
+                 cout << "Diametro aproximado do grafo: " << diametro << endl;
             }
         } 
 
-        // execucao da lista de adj
+        // ======================================== execucao da lista de adj ==========================
         else if (tipo_entrada == 2) {
             cout << "=== Lendo com Lista de Adjacencia ===" << endl;
             lista_adj lista;
@@ -161,11 +171,16 @@ int main() {
                     cin >> vertice_inicial;
                 } while (vertice_inicial < 1 || vertice_inicial > vertices);
 
+                do {
+                    cout << "\nInforme o vertice Destino para as buscas BFS e DFS (1 a " << vertices << "): ";
+                    cin >> vertice_destino;
+                } while (vertice_destino < 1 || vertice_destino > vertices);
+
                 vector<int> pai_bfs(vertices + 1, -1);
                 vector<int> nivel_bfs(vertices + 1, -1);
                 vector<int> comp_bfs;
                 cout << "\nExecutando BFS...";
-                bfs_lista(vertice_inicial, vertices, lista, pai_bfs, nivel_bfs, comp_bfs);
+                bfs_lista(vertice_inicial, vertices, lista, pai_bfs, nivel_bfs, comp_bfs, vertice_destino);
                 if (salvar_arvore_busca(saida_bfs, vertices, pai_bfs, nivel_bfs)) {
                     cout << "\n[OK] Arvore BFS salva em: " << saida_bfs << "\n";
                 }
@@ -176,6 +191,9 @@ int main() {
                 if (salvar_arvore_busca(saida_dfs, vertices, pai_dfs, nivel_dfs)) {
                     cout << "\n[OK] Arvore DFS salva em: " << saida_dfs << "\n";
                 }
+
+                int diametro = diametro_aproximado_lista(vertices, lista);
+                cout << "Diametro aproximado do grafo: " << diametro << endl;
             }
         }
 

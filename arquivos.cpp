@@ -7,6 +7,7 @@ void verificadorDePastaSimples(filesystem::path pastinha){
     
 }
 
+//=================== LISTA DE ADJACENCIA =================
 // gera o arquivo com as informações nessesárias do grafo;
 bool gerar_informacoes_lista(const string &caminhoSaida, int vertices, const lista_adj &lista, const vector<vector<int>>& componentes){
 
@@ -71,6 +72,7 @@ bool gerar_informacoes_lista(const string &caminhoSaida, int vertices, const lis
     return true;
 }
 
+
 bool ler_grafo_lista(const string &caminho, int &vertices, lista_adj &lista_adj){
     int u, v;
     ifstream arq(caminho);
@@ -89,6 +91,7 @@ bool ler_grafo_lista(const string &caminho, int &vertices, lista_adj &lista_adj)
     return true;
 }
 
+//================ MATRIZ DE ADJACENCIA =================
 bool gerar_informacoes_matriz(const string& caminhoSaida,int vertices,const matriz_adj& matriz, const vector<vector<int>>& componentes) {
 
     filesystem::path pasta = "Saidas/Matriz"; verificadorDePastaSimples(pasta);
@@ -153,6 +156,7 @@ bool gerar_informacoes_matriz(const string& caminhoSaida,int vertices,const matr
     arq.close();
     return true;
 }
+
 
 bool ler_grafo_matriz(const string &caminho, int &vertices, matriz_adj &matriz_adj){
     int u, v;
