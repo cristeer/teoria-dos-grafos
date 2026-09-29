@@ -6,6 +6,9 @@
 #include <queue>
 #include <stack>
 #include <string>
+#include <chrono>
+
+void registrarTempo(int verticeInicial, long long tempo);
 
 bool salvar_arvore_busca(const string& caminho_saida, int vertices, const vector<int>& pai, const vector<int>& nivel);
 

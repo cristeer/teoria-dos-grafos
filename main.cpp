@@ -76,6 +76,7 @@ int main() {
 
         // execucao da matriz de adj
         if (tipo_entrada == 1) {
+
             cout << "=== Lendo com Matriz de Adjacencia ===" << "\n";
             matriz_adj matriz;
 
@@ -111,10 +112,12 @@ int main() {
                     cin >> vertice_inicial;
                 } while (vertice_inicial < 1 || vertice_inicial > vertices);
 
-                 do {
+                do {
                     cout << "\nInforme o vertice Destino para as buscas BFS e DFS (1 a " << vertices << "): ";
                     cin >> vertice_destino;
                 } while (vertice_destino < 1 || vertice_destino > vertices);
+
+                auto inicio = chrono::high_resolution_clock::now();
 
                 vector<int> pai_bfs(vertices + 1, -1);
                 vector<int> nivel_bfs(vertices + 1, -1);
@@ -132,8 +135,13 @@ int main() {
                     cout << "\n[OK] Arvore DFS salva em: " << saida_dfs << "\n";
                 }
 
+                auto fim = chrono::high_resolution_clock::now();
+                long long tempo = chrono::duration_cast<chrono::microseconds>(fim - inicio).count();
+                registrarTempo(vertice_inicial, tempo);
+                
+
                 int diametro = diametro_aproximado_matriz(vertices, matriz);
-                 cout << "Diametro aproximado do grafo: " << diametro << endl;
+                cout << "Diametro aproximado do grafo: " << diametro << endl;
             }
         } 
 
@@ -176,6 +184,8 @@ int main() {
                     cin >> vertice_destino;
                 } while (vertice_destino < 1 || vertice_destino > vertices);
 
+                auto inicio = chrono::high_resolution_clock::now();
+
                 vector<int> pai_bfs(vertices + 1, -1);
                 vector<int> nivel_bfs(vertices + 1, -1);
                 vector<int> comp_bfs;
@@ -192,11 +202,15 @@ int main() {
                     cout << "\n[OK] Arvore DFS salva em: " << saida_dfs << "\n";
                 }
 
+                auto fim = chrono::high_resolution_clock::now();
+                long long tempo = chrono::duration_cast<chrono::microseconds>(fim - inicio).count();
+                registrarTempo(vertice_inicial, tempo);
+
                 int diametro = diametro_aproximado_lista(vertices, lista);
                 cout << "Diametro aproximado do grafo: " << diametro << endl;
             }
         }
-
+ 
         cout << "\n=============================================";
         cout << "\nPressione ENTER para voltar ao menu...";
         cin.ignore();

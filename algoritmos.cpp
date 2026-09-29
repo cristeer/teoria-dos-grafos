@@ -1,7 +1,25 @@
 #include "algoritmos.hpp"
 #include <algorithm>
 
+
 int UNVISITED = -1;
+
+
+void registrarTempo(int verticeInicial, long long tempo){
+    // ios::app = abre o arquivo para adicionar no final
+    ofstream arquivo("Agrupamento-Tempo-Total.txt", ios::app);
+
+    if (!arquivo.is_open()){
+        cerr << "Erro ao abrir o arquivo: " << endl;
+        return;
+    }
+
+    //"Vertice inicial: X | Tempo: X microssegundos
+    arquivo << verticeInicial << ";"<< tempo << endl;
+
+    arquivo.close();
+}
+
 
 bool salvar_arvore_busca(const string& caminho_saida, int vertices, const vector<int>& pai, const vector<int>& nivel) {
     filesystem::path pasta = filesystem::path(caminho_saida).parent_path();
@@ -102,7 +120,6 @@ void bfs_matriz(int s, int vertices, const matriz_adj& mat, vector<int>& pai, ve
     pai[s] = 0;
     fila.push(s);
     bool encontrado = false;
-
 
     while (!fila.empty()) {
         int u = fila.front(); 
