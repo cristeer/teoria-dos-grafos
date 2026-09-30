@@ -176,11 +176,11 @@ bool ler_grafo_matriz(const string &caminho, int &vertices, matriz_adj &matriz_a
         return false;
     }
 
-    matriz_adj.assign(vertices + 1, vector<bool>(vertices + 1, false));
+    matriz_adj.assign(vertices + 1, vector<uint8_t>(vertices + 1, 0));
 
     while (arq >> u >> v){
-        matriz_adj[u][v] = true;
-        matriz_adj[v][u] = true;
+        matriz_adj[u][v] = 1;
+        matriz_adj[v][u] = 1;
     }
     return true;
 }

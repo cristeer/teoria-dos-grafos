@@ -7,11 +7,12 @@
 #include<filesystem>
 #include<iomanip>
 #include<algorithm>
+#include <cstdint>
 
 using namespace std;
 
 using lista_adj = vector<vector<int>>; //ex: 1 -> 2, 3, 4 
-using matriz_adj = vector<vector<bool>>;//matrix básica...
+using matriz_adj = vector<vector<uint8_t>>; //matriz básica...
 
 void verificadorDePastaSimples(filesystem::path pastinha);
 

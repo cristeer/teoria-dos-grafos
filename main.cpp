@@ -81,6 +81,11 @@ int main() {
             matriz_adj matriz;
 
             if (ler_grafo_matriz(caminho, vertices, matriz)) {
+                cout << "Grafo carregado. Veja a memoria no Gerenciador de Tarefas.\n";
+                cout << "Pressione ENTER para continuar...";
+                cin.ignore();
+                cin.get();
+                
                 cout << "Numero de vertices: " << vertices << "\n";
 
                 vector<vector<int>> cc = cc_matriz(vertices, matriz);
@@ -151,6 +156,11 @@ int main() {
             lista_adj lista;
 
             if (ler_grafo_lista(caminho, vertices, lista)) {
+                cout << "Grafo carregado. Veja a memoria no Gerenciador de Tarefas.\n";
+                cout << "Pressione ENTER para continuar...";
+                cin.ignore();
+                cin.get();
+                
                 cout << "Numero de vertices: " << vertices << "\n";
 
                 vector<vector<int>> cc = cc_lista(vertices, lista);
