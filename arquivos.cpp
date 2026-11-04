@@ -1,18 +1,22 @@
 #include "arquivos.hpp"
 
-void verificadorDePastaSimples(filesystem::path pastinha){
-    // tenta criar a pasta
-    if (filesystem::create_directories(pastinha))
-        cout << "Pasta criada com sucesso!" << endl;
+
+
+void gera_pastas(){
     
+    filesystem::create_directories("Saidas/Listas");
+    filesystem::create_directories("Saidas/Matriz");
+
+    filesystem::create_directories("Saidas/Dijkstra/Vetor");
+    filesystem::create_directories("Saidas/Dijkstra/Heap");
+
 }
 
 //=================== LISTA DE ADJACENCIA =================
 // gera o arquivo com as informações nessesárias do grafo;
 bool gerar_informacoes_lista(const string &caminhoSaida, int vertices, const lista_adj &lista, const vector<vector<int>>& componentes){
-
-    filesystem::path pasta = "Saidas/Listas";verificadorDePastaSimples(pasta);
     
+
     ofstream arq(caminhoSaida, ios::out | ios::trunc);
     if (!arq.is_open()){
         cout << "Não foi possível criar o arquivo de saída\n";
@@ -94,7 +98,6 @@ bool ler_grafo_lista(const string &caminho, int &vertices, lista_adj &lista_adj)
 //================ MATRIZ DE ADJACENCIA =================
 bool gerar_informacoes_matriz(const string& caminhoSaida,int vertices,const matriz_adj& matriz, const vector<vector<int>>& componentes) {
 
-    filesystem::path pasta = "Saidas/Matriz"; verificadorDePastaSimples(pasta);
     
     ofstream arq(caminhoSaida, ios::out | ios::trunc);
     if (!arq.is_open()){

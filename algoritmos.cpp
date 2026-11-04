@@ -22,10 +22,7 @@ void registrarTempo(int verticeInicial, long long tempo){
 
 
 bool salvar_arvore_busca(const string& caminho_saida, int vertices, const vector<int>& pai, const vector<int>& nivel) {
-    filesystem::path pasta = filesystem::path(caminho_saida).parent_path();
-    if (!pasta.empty()) {
-        verificadorDePastaSimples(pasta);
-    }
+   
 
     ofstream arq(caminho_saida, ios::out | ios::trunc);
     if (!arq.is_open()) {
@@ -226,10 +223,7 @@ vector<vector<int>> cc_matriz(int vertices, const matriz_adj& mat) {
 
 
 bool salvar_componentes_conexas(const string& caminho_saida, const vector<vector<int>>& componentes) {
-    filesystem::path pasta = filesystem::path(caminho_saida).parent_path();
-    if (!pasta.empty()) {
-        verificadorDePastaSimples(pasta);
-    }
+   
 
     ofstream arq(caminho_saida, ios::out | ios::trunc);
     if (!arq.is_open()) {
