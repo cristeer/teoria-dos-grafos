@@ -1,5 +1,69 @@
 #include "arquivos.hpp"
+#include <cmath>
+#include <sstream>
 
+namespace {
+struct aresta_entrada {
+    int origem;
+    int destino;
+    double peso;
+};
+
+bool ler_arestas_arquivo(const string& caminho, int& vertices, vector<aresta_entrada>& arestas) {
+    ifstream arq(caminho);
+    if (!arq.is_open()) {
+        cerr << "Erro ao abrir o arquivo do grafo: " << caminho << "\n";
+        return false;
+    }
+
+    int quantidade_vertices;
+    if (!(arq >> quantidade_vertices) || quantidade_vertices <= 0) {
+        cerr << "Quantidade de vertices invalida no arquivo: " << caminho << "\n";
+        return false;
+    }
+
+    string linha;
+    getline(arq, linha);
+    vector<aresta_entrada> arestas_lidas;
+    while (getline(arq, linha)) {
+        if (linha.find_first_not_of(" \t\r\n") == string::npos) {
+            continue;
+        }
+
+        istringstream entrada(linha);
+        aresta_entrada aresta{0, 0, 1.0};
+        if (!(entrada >> aresta.origem >> aresta.destino)) {
+            cerr << "Linha de aresta invalida no arquivo: " << linha << "\n";
+            return false;
+        }
+
+        entrada >> ws;
+        if (!entrada.eof()) {
+            if (!(entrada >> aresta.peso)) {
+                cerr << "Peso invalido na linha: " << linha << "\n";
+                return false;
+            }
+            entrada >> ws;
+            if (!entrada.eof()) {
+                cerr << "Colunas extras na linha de aresta: " << linha << "\n";
+                return false;
+            }
+        }
+
+        if (aresta.origem < 1 || aresta.origem > quantidade_vertices ||
+            aresta.destino < 1 || aresta.destino > quantidade_vertices ||
+            !std::isfinite(aresta.peso)) {
+            cerr << "Aresta ou peso fora dos limites: " << linha << "\n";
+            return false;
+        }
+        arestas_lidas.push_back(aresta);
+    }
+
+    vertices = quantidade_vertices;
+    arestas = move(arestas_lidas);
+    return true;
+}
+}
 
 
 void gera_pastas(){
@@ -78,19 +142,29 @@ bool gerar_informacoes_lista(const string &caminhoSaida, int vertices, const lis
 
 
 bool ler_grafo_lista(const string &caminho, int &vertices, lista_adj &lista_adj){
-    int u, v;
-    ifstream arq(caminho);
-    if (!arq.is_open()){
-        cout << "Erro de leitura/ Lista\n";
+    vector<aresta_entrada> arestas;
+    if (!ler_arestas_arquivo(caminho, vertices, arestas)) {
         return false;
     }
 
-    arq >> vertices;
     lista_adj.assign(vertices + 1, {});
+    for (const aresta_entrada& aresta : arestas) {
+        lista_adj[aresta.origem].push_back(aresta.destino);
+        lista_adj[aresta.destino].push_back(aresta.origem);
+    }
+    return true;
+}
 
-    while (arq >> u >> v){
-        lista_adj[u].push_back(v);
-        lista_adj[v].push_back(u);
+bool ler_grafo_lista(const string& caminho, int& vertices, lista_adj_ponderada& lista) {
+    vector<aresta_entrada> arestas;
+    if (!ler_arestas_arquivo(caminho, vertices, arestas)) {
+        return false;
+    }
+
+    lista.assign(vertices + 1, {});
+    for (const aresta_entrada& aresta : arestas) {
+        lista[aresta.origem].push_back({aresta.destino, aresta.peso});
+        lista[aresta.destino].push_back({aresta.origem, aresta.peso});
     }
     return true;
 }
@@ -162,15 +236,10 @@ bool gerar_informacoes_matriz(const string& caminhoSaida,int vertices,const matr
 
 
 bool ler_grafo_matriz(const string &caminho, int &vertices, matriz_adj &matriz_adj){
-    int u, v;
-
-    ifstream arq(caminho);
-    if (!arq.is_open()){
-        cout << "Erro de leitura/ Matriz\n";
+    vector<aresta_entrada> arestas;
+    if (!ler_arestas_arquivo(caminho, vertices, arestas)) {
         return false;
     }
-
-    arq >> vertices;
 
     const int limite = 50000;
     if (vertices > limite) {
@@ -180,10 +249,31 @@ bool ler_grafo_matriz(const string &caminho, int &vertices, matriz_adj &matriz_a
     }
 
     matriz_adj.assign(vertices + 1, vector<bool>(vertices + 1, false));
+    for (const aresta_entrada& aresta : arestas) {
+        matriz_adj[aresta.origem][aresta.destino] = true;
+        matriz_adj[aresta.destino][aresta.origem] = true;
+    }
+    return true;
+}
 
-    while (arq >> u >> v){
-        matriz_adj[u][v] = true;
-        matriz_adj[v][u] = true;
+bool ler_grafo_matriz(const string& caminho, int& vertices, matriz_adj_ponderada& matriz) {
+    vector<aresta_entrada> arestas;
+    if (!ler_arestas_arquivo(caminho, vertices, arestas)) {
+        return false;
+    }
+
+    const int limite = 50000;
+    if (vertices > limite) {
+        cerr << "\n[ERRO] Memoria Insuficiente\n";
+        cerr << "Utilize Lista de Adjacencia para esta instancia.\n";
+        return false;
+    }
+
+    matriz.assign(vertices + 1, vector<celula_matriz_ponderada>(
+        vertices + 1, celula_matriz_ponderada{false, 0.0}));
+    for (const aresta_entrada& aresta : arestas) {
+        matriz[aresta.origem][aresta.destino] = {true, aresta.peso};
+        matriz[aresta.destino][aresta.origem] = {true, aresta.peso};
     }
     return true;
 }
