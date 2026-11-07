@@ -66,6 +66,8 @@ bool ler_arestas_arquivo(const string& caminho, int& vertices, vector<aresta_ent
 }
 
 
+
+
 void gera_pastas(){
     
     filesystem::create_directories("Saidas/Listas");
@@ -277,3 +279,5 @@ bool ler_grafo_matriz(const string& caminho, int& vertices, matriz_adj_ponderada
     }
     return true;
 }
+
+

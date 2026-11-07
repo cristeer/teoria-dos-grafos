@@ -9,6 +9,12 @@ bool executarDijkstra(string caminho, string saida, int tipo_fila, int imprimir)
     int vertices = 0, vertice_inicial = 1, vertice_destino = 1;
     lista_adj_ponderada lista;
 
+    ofstream arquivo("Agrupamento-Tempo-Dikstra.txt", ios::app);
+    if (!arquivo.is_open()){
+        cerr << "Erro ao abrir o arquivo: " << endl;
+        return false;
+    }
+
     cout << "=== Dijkstra com " << (tipo_fila == FILA_HEAP ? "Heap" : "Vetor") << " ===\n";
     if (!ler_grafo_lista(caminho, vertices, lista)){
         return false;
@@ -53,15 +59,23 @@ bool executarDijkstra(string caminho, string saida, int tipo_fila, int imprimir)
     }
 
     vector<int> caminho_min = caminho_minimo(pai, vertice_destino);
+
     if (caminho_min.empty()){
         cout << "\nVertice " << vertice_destino << " nao e alcancavel a partir de " << vertice_inicial << ".\n";
     } else {
         cout << "\nDistancia " << vertice_inicial << " -> " << vertice_destino << ": " << dist[vertice_destino] << "\n";
         cout << "Caminho: ";
+        arquivo << caminho << "\n";
+        arquivo << "Tipo: " << tipo_fila << "\nInicio " << vertice_inicial << " / Destino " << vertice_destino << " / Distancia " << dist[vertice_destino] << " / Tempo " << tempo << endl << "Caminho: ";
         for (size_t i = 0; i < caminho_min.size(); ++i){
             cout << caminho_min[i] << (i + 1 == caminho_min.size() ? "" : " -> ");
+            arquivo << caminho_min[i] << (i + 1 == caminho_min.size() ? "" : " -> ");
         }
+        arquivo << "\n=============================================\n";
         cout << "\n";
+
+        arquivo << endl;
+        arquivo.close();
     }
     return true;
 }
@@ -77,6 +91,12 @@ void DijkstraHeap(string caminho, string saida, int imprimir){
 void gcpMenu(){
     string caminho = "", saida = "";
     int tipo_entrada = 0, select = 0, imprimir = 0;
+
+    ofstream arquivo("Agrupamento-Tempo-Dikstra.txt", ios::app);
+    if (!arquivo.is_open()){
+        cerr << "Erro ao abrir o arquivo: " << endl;
+        return;
+    }
 
     do{
     grafo:

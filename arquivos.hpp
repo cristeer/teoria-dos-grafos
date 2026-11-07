@@ -26,6 +26,8 @@ struct celula_matriz_ponderada {
 using lista_adj_ponderada = vector<vector<aresta_ponderada>>;
 using matriz_adj_ponderada = vector<vector<celula_matriz_ponderada>>;
 
+void salvadora();
+
 void gera_pastas();
 
 bool gerar_informacoes_lista(const string& caminhoSaida, int vertices, const lista_adj& lista, const vector<vector<int>>& componentes);

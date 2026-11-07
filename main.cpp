@@ -32,9 +32,9 @@ int main(){
             }
 
             cout << "\n=============================================";
-            cout << "\nPressione ENTER para voltar ao menu...";
-            cin.ignore();
-            cin.get();
+            //cout << "\nPressione ENTER para voltar ao menu...";
+            //cin.ignore();
+            //cin.get();
         }
 
     } while (tipo != 0);
