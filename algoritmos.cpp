@@ -340,3 +340,174 @@ int diametro_aproximado_matriz(int vertices,const matriz_adj& mat) {
 
     return diametro;
 }
+
+
+//=====================================================================
+//                    DIJKSTRA (grafos com peso)
+//=====================================================================
+
+//---------- Estrutura 1: VETOR de estimativas ----------
+// atualizar = O(1); extrair_min = varredura O(V)  =>  Dijkstra O(V^2 + E)
+static void vetor_atualizar(fila_distancias& f, int v, double d) {
+    f.chave[v] = d;
+    f.na_fila[v] = 1;
+}
+
+static bool vetor_extrair_min(fila_distancias& f, int& v, double& d) {
+    int melhor = -1;
+    int n = (int)f.chave.size() - 1;
+    for (int i = 1; i <= n; ++i) {
+        if (f.na_fila[i] && (melhor == -1 || f.chave[i] < f.chave[melhor]))
+            melhor = i;
+    }
+    if (melhor == -1) return false;
+    f.na_fila[melhor] = 0;   // sai da fila; a chave (distância final) permanece
+    v = melhor;
+    d = f.chave[melhor];
+    return true;
+}
+
+void fila_vetor_iniciar(fila_distancias& f, int vertices) {
+    f.chave.assign(vertices + 1, INF_DIST);
+    f.na_fila.assign(vertices + 1, 0);
+    f.heap_v.clear();
+    f.pos.clear();
+    f.atualizar = vetor_atualizar;
+    f.extrair_min = vetor_extrair_min;
+}
+
+//---------- Estrutura 2: HEAP BINÁRIO com índice de posição ----------
+// pos[v] permite achar v dentro do heap em O(1) e diminuir sua chave em
+// O(log V) ("decrease-key"), sem inserir duplicatas.
+//  =>  Dijkstra O((V + E) log V)
+static void heap_troca(fila_distancias& f, int i, int j) {
+    swap(f.heap_v[i], f.heap_v[j]);
+    f.pos[f.heap_v[i]] = i;
+    f.pos[f.heap_v[j]] = j;
+}
+
+static void heap_subir(fila_distancias& f, int i) {
+    while (i > 0) {
+        int p = (i - 1) / 2;
+        if (f.chave[f.heap_v[p]] <= f.chave[f.heap_v[i]]) break;
+        heap_troca(f, i, p);
+        i = p;
+    }
+}
+
+static void heap_descer(fila_distancias& f, int i) {
+    int n = (int)f.heap_v.size();
+    while (true) {
+        int esq = 2 * i + 1, dir = esq + 1, menor = i;
+        if (esq < n && f.chave[f.heap_v[esq]] < f.chave[f.heap_v[menor]]) menor = esq;
+        if (dir < n && f.chave[f.heap_v[dir]] < f.chave[f.heap_v[menor]]) menor = dir;
+        if (menor == i) break;
+        heap_troca(f, i, menor);
+        i = menor;
+    }
+}
+
+static void heap_atualizar(fila_distancias& f, int v, double d) {
+    f.chave[v] = d;
+    if (f.pos[v] == -1) {                       // ainda não está no heap: insere
+        f.heap_v.push_back(v);
+        f.pos[v] = (int)f.heap_v.size() - 1;
+    }
+    heap_subir(f, f.pos[v]);                    // só diminui chave => só sobe
+}
+
+static bool heap_extrair_min(fila_distancias& f, int& v, double& d) {
+    if (f.heap_v.empty()) return false;
+    v = f.heap_v[0];
+    d = f.chave[v];
+    heap_troca(f, 0, (int)f.heap_v.size() - 1);
+    f.heap_v.pop_back();
+    f.pos[v] = -1;                              // a chave permanece em f.chave[v]
+    if (!f.heap_v.empty()) heap_descer(f, 0);
+    return true;
+}
+
+void fila_heap_iniciar(fila_distancias& f, int vertices) {
+    f.chave.assign(vertices + 1, INF_DIST);
+    f.pos.assign(vertices + 1, -1);
+    f.heap_v.clear();
+    f.na_fila.clear();
+    f.atualizar = heap_atualizar;
+    f.extrair_min = heap_extrair_min;
+}
+
+//---------- Algoritmo (UMA única implementação) ----------
+void dijkstra_generico(int s, int vertices, const lista_adj_ponderada& adj,
+                       fila_distancias& fila, vector<int>& pai) {
+    pai.assign(vertices + 1, -1);
+    pai[s] = 0;                       // raiz (mesma convenção da BFS/DFS)
+    fila.atualizar(fila, s, 0.0);
+
+    int u;
+    double d;
+    while (fila.extrair_min(fila, u, d)) {
+        for (const aresta_ponderada& a : adj[u]) {
+            double nova = d + a.peso;
+            if (nova < fila.chave[a.destino]) {      // relaxamento
+                fila.atualizar(fila, a.destino, nova);
+                pai[a.destino] = u;
+            }
+        }
+    }
+}
+
+bool grafo_tem_peso_negativo(int vertices, const lista_adj_ponderada& adj) {
+    for (int u = 1; u <= vertices; ++u)
+        for (const aresta_ponderada& a : adj[u])
+            if (a.peso < 0) return true;
+    return false;
+}
+
+bool dijkstra_lista(int s, int vertices, const lista_adj_ponderada& adj, int tipo_fila,
+                    vector<double>& dist, vector<int>& pai) {
+    if (s < 1 || s > vertices) {
+        cout << "Vertice inicial invalido.\n";
+        return false;
+    }
+    if (grafo_tem_peso_negativo(vertices, adj)) {
+        cout << "\n[AVISO] O grafo possui arestas com peso negativo.\n"
+             << "A biblioteca ainda nao implementa caminhos minimos com pesos negativos.\n";
+        return false;
+    }
+
+    fila_distancias fila;
+    if (tipo_fila == FILA_HEAP) fila_heap_iniciar(fila, vertices);
+    else                        fila_vetor_iniciar(fila, vertices);
+
+    dijkstra_generico(s, vertices, adj, fila, pai);
+    dist = move(fila.chave);          // as chaves finais são as distâncias
+    return true;
+}
+
+vector<int> caminho_minimo(const vector<int>& pai, int t) {
+    vector<int> caminho;
+    if (t < 1 || t >= (int)pai.size() || pai[t] == -1) return caminho;   // inalcançável
+    for (int v = t; v != 0; v = pai[v]) caminho.push_back(v);
+    reverse(caminho.begin(), caminho.end());
+    return caminho;
+}
+
+bool salvar_dijkstra(const string& caminho_saida, int vertices, int s,
+                     const vector<double>& dist, const vector<int>& pai) {
+    ofstream arq(caminho_saida, ios::out | ios::trunc);
+    if (!arq.is_open()) {
+        cout << "Erro ao criar o arquivo de caminhos minimos!\n";
+        return false;
+    }
+
+    arq << "ARVORE DE CAMINHOS MINIMOS (origem = " << s << ")\n";
+    arq << "Vertice\tPai\tDistancia\n";
+    arq << "-----------------------------\n";
+    arq << setprecision(10);
+    for (int i = 1; i <= vertices; ++i) {
+        if (pai[i] != -1) arq << i << "\t" << pai[i] << "\t" << dist[i] << "\n";
+        else              arq << i << "\t-\tInalcançável\n";
+    }
+    arq.close();
+    return true;
+}

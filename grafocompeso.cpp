@@ -2,25 +2,80 @@
 #include "arquivos.hpp"
 #include "algoritmos.hpp"
 
-//criei para ajustar o menu
-void DijkstraVetor(string caminho, string saida, string saida_vetor, int imprimir){
+// Lê o grafo, pergunta origem/destino, roda o Dijkstra com a estrutura escolhida
+// e grava a árvore de caminhos mínimos. O algoritmo é o MESMO para as duas
+// estruturas; só muda o tipo_fila (veja algoritmos.cpp).
+bool executarDijkstra(string caminho, string saida, int tipo_fila, int imprimir){
+    int vertices = 0, vertice_inicial = 1, vertice_destino = 1;
+    lista_adj_ponderada lista;
 
+    cout << "=== Dijkstra com " << (tipo_fila == FILA_HEAP ? "Heap" : "Vetor") << " ===\n";
+    if (!ler_grafo_lista(caminho, vertices, lista)){
+        return false;
+    }
+    cout << "Numero de vertices: " << vertices << "\n";
 
+    if (imprimir == 1){
+        cout << "\n";
+        for (int i = 1; i <= vertices; ++i){
+            cout << "Vertice " << i << ":";
+            for (const aresta_ponderada& a : lista[i]){
+                cout << " -> " << a.destino << " (" << a.peso << ")";
+            }
+            cout << "\n";
+        }
+    }
+
+    do{
+        cout << "\nInforme o vertice inicial (1 a " << vertices << "): ";
+        cin >> vertice_inicial;
+    } while (vertice_inicial < 1 || vertice_inicial > vertices);
+
+    do{
+        cout << "\nInforme o vertice destino para exibir o caminho (1 a " << vertices << "): ";
+        cin >> vertice_destino;
+    } while (vertice_destino < 1 || vertice_destino > vertices);
+
+    vector<double> dist;
+    vector<int> pai;
+
+    auto inicio = chrono::high_resolution_clock::now();
+    bool ok = dijkstra_lista(vertice_inicial, vertices, lista, tipo_fila, dist, pai);
+    auto fim = chrono::high_resolution_clock::now();
+    if (!ok){
+        return false;   // peso negativo: a mensagem já foi exibida
+    }
+    long long tempo = chrono::duration_cast<chrono::microseconds>(fim - inicio).count();
+    cout << "\nDijkstra executado em " << tempo << " microssegundos.\n";
+
+    if (salvar_dijkstra(saida, vertices, vertice_inicial, dist, pai)){
+        cout << "[OK] Arvore de caminhos minimos salva em: " << saida << "\n";
+    }
+
+    vector<int> caminho_min = caminho_minimo(pai, vertice_destino);
+    if (caminho_min.empty()){
+        cout << "\nVertice " << vertice_destino << " nao e alcancavel a partir de " << vertice_inicial << ".\n";
+    } else {
+        cout << "\nDistancia " << vertice_inicial << " -> " << vertice_destino << ": " << dist[vertice_destino] << "\n";
+        cout << "Caminho: ";
+        for (size_t i = 0; i < caminho_min.size(); ++i){
+            cout << caminho_min[i] << (i + 1 == caminho_min.size() ? "" : " -> ");
+        }
+        cout << "\n";
+    }
+    return true;
 }
 
-
-//só criei para ajustar o menu
-void DijkstraHeap(string caminho, string saida, string saida_vetor, int imprimir){
-
-
+void DijkstraVetor(string caminho, string saida, int imprimir){
+    executarDijkstra(caminho, saida, FILA_VETOR, imprimir);
 }
 
-
-
-
+void DijkstraHeap(string caminho, string saida, int imprimir){
+    executarDijkstra(caminho, saida, FILA_HEAP, imprimir);
+}
 
 void gcpMenu(){
-    string caminho = "", saida = "", saida_vetor = "", saida_heap = "";
+    string caminho = "", saida = "";
     int tipo_entrada = 0, select = 0, imprimir = 0;
 
     do{
@@ -77,28 +132,20 @@ void gcpMenu(){
     }
 
     
-    // caminhos e arquivos de saída
+    // caminhos e arquivos de saída (pastas criadas em gera_pastas())
     caminho = "instancias/grafo_W_" + to_string(select) + ".txt";
-    string pasta_saida = (tipo_entrada == 1) ? "Saidas/Dijkstra_Vetor/" : "Saidas/Dijkstra_Heap/";
-    string prefixo = "grafo_W_" + to_string(select);
+    string pasta_saida = (tipo_entrada == 1) ? "Saidas/Dijkstra/Vetor/" : "Saidas/Dijkstra/Heap/";
+    saida = pasta_saida + "grafo_W_" + to_string(select) + "_dijkstra.txt";
 
-    saida = pasta_saida + prefixo + "_info.txt";
-    saida_vetor = pasta_saida + prefixo + "_vetor.txt";
-    saida_heap = pasta_saida + prefixo + "_heap.txt";
-        
     system("cls");
 
-    switch (tipo_entrada){  //AJUSTAR AS PASTAS, Criar somente as nessesárias
+    switch (tipo_entrada){
         case 1:{
-            DijkstraVetor(caminho, saida, saida_vetor, imprimir);
+            DijkstraVetor(caminho, saida, imprimir);
         }break;
 
         case 2:{
-            DijkstraHeap(caminho, saida, saida_heap, imprimir);
+            DijkstraHeap(caminho, saida, imprimir);
         }break;
-
     }
-
-
 }
-
