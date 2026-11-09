@@ -353,10 +353,18 @@ static void vetor_atualizar(fila_distancias& f, int v, double d) {
     f.na_fila[v] = 1;
 }
 
+static bool fila_limite_tempo_atingido(fila_distancias& f) {
+    if (f.limite_tempo_ativo && chrono::steady_clock::now() >= f.prazo) {
+        f.limite_tempo_atingido = true;
+    }
+    return f.limite_tempo_atingido;
+}
+
 static bool vetor_extrair_min(fila_distancias& f, int& v, double& d) {
     int melhor = -1;
     int n = (int)f.chave.size() - 1;
     for (int i = 1; i <= n; ++i) {
+        if ((i & 4095) == 0 && fila_limite_tempo_atingido(f)) return false;
         if (f.na_fila[i] && (melhor == -1 || f.chave[i] < f.chave[melhor]))
             melhor = i;
     }
@@ -372,6 +380,8 @@ void fila_vetor_iniciar(fila_distancias& f, int vertices) {
     f.na_fila.assign(vertices + 1, 0);
     f.heap_v.clear();
     f.pos.clear();
+    f.limite_tempo_ativo = false;
+    f.limite_tempo_atingido = false;
     f.atualizar = vetor_atualizar;
     f.extrair_min = vetor_extrair_min;
 }
@@ -432,6 +442,8 @@ void fila_heap_iniciar(fila_distancias& f, int vertices) {
     f.pos.assign(vertices + 1, -1);
     f.heap_v.clear();
     f.na_fila.clear();
+    f.limite_tempo_ativo = false;
+    f.limite_tempo_atingido = false;
     f.atualizar = heap_atualizar;
     f.extrair_min = heap_extrair_min;
 }
@@ -445,8 +457,13 @@ void dijkstra_generico(int s, int vertices, const lista_adj_ponderada& adj,
 
     int u;
     double d;
-    while (fila.extrair_min(fila, u, d)) {
+    size_t arcos_processados = 0;
+    while (true) {
+        if (fila_limite_tempo_atingido(fila)) break;
+        if (!fila.extrair_min(fila, u, d)) break;
         for (const aresta_ponderada& a : adj[u]) {
+            if ((arcos_processados++ & 4095) == 0 &&
+                fila_limite_tempo_atingido(fila)) return;
             double nova = d + a.peso;
             if (nova < fila.chave[a.destino]) {      // relaxamento
                 fila.atualizar(fila, a.destino, nova);

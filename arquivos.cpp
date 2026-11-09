@@ -9,7 +9,10 @@ struct aresta_entrada {
     double peso;
 };
 
-bool ler_arestas_arquivo(const string& caminho, int& vertices, vector<aresta_entrada>& arestas) {
+bool ler_arestas_arquivo(
+    const string& caminho, int& vertices, vector<aresta_entrada>& arestas,
+    const chrono::steady_clock::time_point* prazo = nullptr,
+    bool* limite_atingido = nullptr) {
     ifstream arq(caminho);
     if (!arq.is_open()) {
         cerr << "Erro ao abrir o arquivo do grafo: " << caminho << "\n";
@@ -25,7 +28,13 @@ bool ler_arestas_arquivo(const string& caminho, int& vertices, vector<aresta_ent
     string linha;
     getline(arq, linha);
     vector<aresta_entrada> arestas_lidas;
+    size_t linhas_lidas = 0;
     while (getline(arq, linha)) {
+        if ((linhas_lidas++ & 4095) == 0 && prazo != nullptr &&
+            chrono::steady_clock::now() >= *prazo) {
+            if (limite_atingido != nullptr) *limite_atingido = true;
+            return false;
+        }
         if (linha.find_first_not_of(" \t\r\n") == string::npos) {
             continue;
         }
@@ -61,6 +70,70 @@ bool ler_arestas_arquivo(const string& caminho, int& vertices, vector<aresta_ent
 
     vertices = quantidade_vertices;
     arestas = move(arestas_lidas);
+    return true;
+}
+
+bool ler_grafo_ponderado_direto(
+    const string& caminho, int& vertices, lista_adj_ponderada& lista,
+    const chrono::steady_clock::time_point* prazo = nullptr,
+    bool* limite_atingido = nullptr) {
+    if (limite_atingido != nullptr) *limite_atingido = false;
+    ifstream arq(caminho);
+    if (!arq.is_open()) {
+        cerr << "Erro ao abrir o arquivo do grafo: " << caminho << "\n";
+        return false;
+    }
+
+    int quantidade_vertices;
+    if (!(arq >> quantidade_vertices) || quantidade_vertices <= 0) {
+        cerr << "Quantidade de vertices invalida no arquivo: " << caminho << "\n";
+        return false;
+    }
+
+    lista.assign(quantidade_vertices + 1, {});
+    string linha;
+    getline(arq, linha);
+    size_t linhas_lidas = 0;
+    while (getline(arq, linha)) {
+        if ((linhas_lidas++ & 4095) == 0 && prazo != nullptr &&
+            chrono::steady_clock::now() >= *prazo) {
+            if (limite_atingido != nullptr) *limite_atingido = true;
+            lista.clear();
+            return false;
+        }
+        if (linha.find_first_not_of(" \t\r\n") == string::npos) continue;
+
+        istringstream entrada(linha);
+        aresta_entrada aresta{0, 0, 1.0};
+        if (!(entrada >> aresta.origem >> aresta.destino)) {
+            cerr << "Linha de aresta invalida no arquivo: " << linha << "\n";
+            return false;
+        }
+
+        entrada >> ws;
+        if (!entrada.eof()) {
+            if (!(entrada >> aresta.peso)) {
+                cerr << "Peso invalido na linha: " << linha << "\n";
+                return false;
+            }
+            entrada >> ws;
+            if (!entrada.eof()) {
+                cerr << "Colunas extras na linha de aresta: " << linha << "\n";
+                return false;
+            }
+        }
+
+        if (aresta.origem < 1 || aresta.origem > quantidade_vertices ||
+            aresta.destino < 1 || aresta.destino > quantidade_vertices ||
+            !std::isfinite(aresta.peso)) {
+            cerr << "Aresta ou peso fora dos limites: " << linha << "\n";
+            return false;
+        }
+        lista[aresta.origem].push_back({aresta.destino, aresta.peso});
+        lista[aresta.destino].push_back({aresta.origem, aresta.peso});
+    }
+
+    vertices = quantidade_vertices;
     return true;
 }
 }
@@ -158,15 +231,16 @@ bool ler_grafo_lista(const string &caminho, int &vertices, lista_adj &lista_adj)
 }
 
 bool ler_grafo_lista(const string& caminho, int& vertices, lista_adj_ponderada& lista) {
-    vector<aresta_entrada> arestas;
-    if (!ler_arestas_arquivo(caminho, vertices, arestas)) {
-        return false;
-    }
+    return ler_grafo_ponderado_direto(caminho, vertices, lista);
+}
 
-    lista.assign(vertices + 1, {});
-    for (const aresta_entrada& aresta : arestas) {
-        lista[aresta.origem].push_back({aresta.destino, aresta.peso});
-        lista[aresta.destino].push_back({aresta.origem, aresta.peso});
+bool ler_grafo_lista_ponderada_ate(
+    const string& caminho, int& vertices, lista_adj_ponderada& lista,
+    chrono::steady_clock::time_point prazo, bool& limite_atingido) {
+    if (!ler_grafo_ponderado_direto(caminho, vertices, lista, &prazo,
+                                    &limite_atingido)) {
+        if (!limite_atingido) cerr << "Erro ao ler o grafo: " << caminho << "\n";
+        return false;
     }
     return true;
 }
@@ -279,5 +353,3 @@ bool ler_grafo_matriz(const string& caminho, int& vertices, matriz_adj_ponderada
     }
     return true;
 }
-
-

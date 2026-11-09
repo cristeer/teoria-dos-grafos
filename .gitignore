@@ -1,4 +1,4 @@
-instancias/*.txt
+instancias/
 output/
 *.exe
 .vscode/

@@ -37,6 +37,9 @@ enum tipo_fila_dijkstra { FILA_VETOR = 1, FILA_HEAP = 2 };
 
 struct fila_distancias {
     vector<double> chave;     // estimativa de distância de cada vértice (1..n)
+    chrono::steady_clock::time_point prazo;
+    bool limite_tempo_ativo = false;
+    bool limite_tempo_atingido = false;
 
     // usado só pela versão VETOR
     vector<char>   na_fila;   // na_fila[v] = v tem estimativa e ainda não foi extraído
